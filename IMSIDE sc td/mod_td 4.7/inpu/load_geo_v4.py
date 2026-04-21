@@ -6,7 +6,6 @@ import numpy as np
 
 def geo_GUA2():
     
-    
     Ln = np.array([25000,10000,72000,3000,25000])
     bsn = np.array([150,250,450,500,3000,3000*np.exp(10)])
     dxn= np.array([1000,500,500,250,250])
@@ -20,15 +19,11 @@ def geo_GUA2():
 def geo_DLW2():
     
     Hn= np.array([7.4]*4)
-
-    
     Ln = np.array([60000,142000,13000,25000])
     bsn = np.array([200,500,41500,18000,18000*np.exp(10)])
     dxn= np.array([3000,1000,500,500])
     
     return Hn, Ln, bsn, dxn
-
-
 
 
 def geo_LOI2():
@@ -40,6 +35,5 @@ def geo_LOI2():
     #dxn= np.array([866,500,100,100,100])
     #Hn = np.array([3.6,10,12,12,12])
     Hn = np.array([2.5,9,9,12,12])
-    
     
     return Hn, Ln, bsn, dxn
