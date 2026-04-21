@@ -2,3 +2,12 @@
 
 # ignore data files
 data
+
+# ignore virtual environment
+.venv
+
+# ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# ignore local note file 
+notes_pb.txt
