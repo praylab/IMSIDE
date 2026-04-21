@@ -22,6 +22,6 @@ outD = runD.solve_eqs('D')
 #run.plot_sst(out[0] , run.ii_all)
 #run.plot_sst(out[7] , run.ii_all)
 
-runD.plot_X2(outD , runD.ii_all )
+runD.plot_X2(outD , runD.ii_all)
 
-#run.plot_transport(out[0] , run.ii_all, 0)
+# runD.plot_transport(outD[0] , runD.ii_all, 0)
