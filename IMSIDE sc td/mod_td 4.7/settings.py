@@ -67,4 +67,37 @@ geo_pars = geo_GUA2()
 forc_pars = forc_try1()
 #choose physical constants
 phys_pars = phys_GUA()
+
+
+# =============================================================================
+# Guadalquivir test 30 days 
+# =============================================================================
+# date 
+date_start, date_stop = '2013-06-01' , '2013-07-01'
+
+
+#choose physical constants
+constants = phys_gen()
+#choose geometry
+geo_pars = geo_GUA2()
+#choose forcing. 
+forc_pars = forc_GUA1()
+#choose physical constants
+phys_pars = phys_GUA()
+
 '''
+# =============================================================================
+# Guadalquivir test 90 days 
+# =============================================================================
+# date 
+date_start, date_stop = '2008-01-01' , '2008-03-31'
+
+
+#choose physical constants
+constants = phys_gen()
+#choose geometry
+geo_pars = geo_GUA2()
+#choose forcing. 
+forc_pars = forc_GUA_pb(date_start, date_stop)
+#choose physical constants
+phys_pars = phys_GUA()
