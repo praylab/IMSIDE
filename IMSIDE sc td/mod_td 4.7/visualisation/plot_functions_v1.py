@@ -30,6 +30,33 @@ def plot_sst(self,sss, indi):
     ax.set_xlim(-30,0)
     plt.show()  
 
+def plot_sst_time(self,sss, indi):
+     
+    ss2 = np.delete(sss , np.concatenate([indi['bnl_rgt'].flatten(),indi['bnl_lft'].flatten(),indi['bnl_bnd']]))
+    
+    # =============================================================================
+    # Plot salt field at a predifined time step
+    # =============================================================================
+   
+    #calculate and plot total salinity 
+    s_b = np.transpose([np.reshape(ss2,(self.di[-1],self.M))[:,0]]*self.nz)
+    sn  = np.reshape(ss2,(self.di[-1],self.M))[:,1:]
+    s_p = np.array([np.sum([sn[i,n-1]*np.cos(np.pi*n *self.z_nd) for n in range(1,self.M)],0) for i in range(self.di[-1])])
+    s   = (s_b+s_p)*self.soc_sca
+    s[np.where((s<0) & (s>-0.0001))]= 1e-10 #remove negative values due to numerical precision
+
+    #make contourplot
+    fig,ax = plt.subplots(figsize=(10,7))
+    l1=ax.contourf(np.tile(self.px+25, (self.nz, 1)), self.pz.T,  s.T, cmap='RdBu_r',levels=(np.linspace(0,self.soc_sca,36)))
+
+    #ax.quiver(qx,qz,qu.transpose(),qw.transpose(),color='white')
+    cb0 = fig.colorbar(l1, ax=ax,orientation='horizontal', pad=0.16)
+    cb0.set_label(label='Salinity [psu]',fontsize=16)
+    ax.set_xlabel('$x$ [km]',fontsize=16) 
+    ax.set_ylabel('$z$ [m]',fontsize=16)    
+    ax.set_xlim(-30,0)
+    plt.show()  
+
 #plot_sst(run, out[1], run.ii_all)
 #plot_sst(run, out[10], run.ii_all)
 #plot_sst(run, out[11], run.ii_all)
