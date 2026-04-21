@@ -264,11 +264,38 @@ def forc_GUA3(dat_start , dat_stop):
     return (T, dt) , (Q, soc, sri) , (tid_comp, tid_per, a_tide, p_tide)
 
 
+def forc_GUA_pb(dat_start , dat_stop):
+    # =============================================================================
+    # build forcing for Guadalquivir 2009
+    # =============================================================================
+            
+    disc = sp.io.loadmat('data/freshwater_discharges.mat')
 
+    Q_gu = np.array(disc['Q']).flatten()
+    Qt = np.array(disc['t']).flatten()
+    i_start = np.where(Qt == pd.to_datetime(dat_start+' 00:00:00').value/(10**9*3600*24)+719529)[0]
+    i_stop =  np.where(Qt == pd.to_datetime(dat_stop+' 00:00:00').value/(10**9*3600*24)+719529)[0]
+    
+    if len(i_start) ==0 or len(i_stop) == 0 : print('ERROR: chosen date not available ')
+    
+    Q_here = Q_gu[i_start[0]:i_stop[0]]
 
-
-
-
+    #time
+    T = len(Q_here)
+    dt = np.zeros(T) + 24*3600 # daily discharge in seconds 
+    
+    #subtidal
+    Q   = Q_here.copy()
+    soc = 35  + np.zeros(T)
+    sri = 0.5 + np.zeros(T)
+    
+    #tidal 
+    tid_comp = ['M2']
+    tid_per = [44700]
+    a_tide  = [0.95]
+    p_tide  = [53]
+        
+    return (T, dt) , (Q, soc, sri) , (tid_comp, tid_per, a_tide, p_tide)
 
 
 
