@@ -151,6 +151,11 @@ def plot_transport(self, sss, indi, t):
     
     
 def plot_X2(self, sss_sav, indi):
+    '''
+    plot the salt intrusion length as a function of time 
+    :param sss_sav: output of solve_eqs
+    :param indi: indices to map sss to the salinity field 
+    '''
     # =============================================================================
     # plot the salt intrusion length as a function of time 
     # =============================================================================
@@ -160,7 +165,12 @@ def plot_X2(self, sss_sav, indi):
         ss2 = np.delete(sss_sav[t] , np.concatenate([indi['bnl_rgt'].flatten(),indi['bnl_lft'].flatten(),indi['bnl_bnd']]))
         
         #calculate salt intrusion length 
-        sbot = self.soc_sca*(np.reshape(ss2,(self.di[-1],self.M))[:,0] + np.sum(np.reshape(ss2,(self.di[-1],self.M))[:,1:]*np.array([(-1)**n for n in range(1,self.M)]),1))
+        sbot = self.soc_sca * (\
+            np.reshape(ss2,(self.di[-1],self.M))[:,0] \
+                + np.sum(
+                    np.reshape(ss2,(self.di[-1],self.M))[:,1:] * np.array([(-1)**n for n in range(1,self.M)]),1
+                    )
+                    )
         Lint[t] = -self.px[np.where(sbot>2)[0][0]] - self.Ln[-1]/1000 
 
 
