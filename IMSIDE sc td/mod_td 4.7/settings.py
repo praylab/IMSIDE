@@ -6,7 +6,7 @@
 from inpu.load_phys_v4 import phys_gen, phys_all3est, phys_all3est_v2, phys_DLW, phys_GUA, phys_LOI
 from inpu.load_phys_v4 import phys_GUA
 from inpu.load_geo_v4  import geo_GUA2, geo_DLW2, geo_LOI2
-from inpu.load_forc_td_v4 import forc_GUA1, forc_DLW1, forc_try1, forc_DLW2, forc_GUA2, forc_LOI1, forc_LOI2
+from inpu.load_forc_td_v4 import forc_GUA1, forc_DLW1, forc_try1, forc_DLW2, forc_GUA2, forc_LOI1, forc_LOI2, forc_GUA_pb
 '''
 
 # =============================================================================
@@ -22,7 +22,7 @@ geo_pars = geo_DLW2()
 forc_pars = forc_DLW2(date_start, date_stop)
 #choose physical constants
 phys_pars = phys_DLW()
-'''
+
 # =============================================================================
 # Guadalquivir
 # =============================================================================
@@ -35,7 +35,7 @@ forc_pars = forc_GUA1()
 #choose physical constants
 phys_pars = phys_GUA()
 
-'''
+
 # =============================================================================
 # Loire
 # =============================================================================
