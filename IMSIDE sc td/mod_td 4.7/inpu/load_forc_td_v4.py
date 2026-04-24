@@ -361,8 +361,22 @@ def forc_LOI_Q(Qin):
     return (T, dt) , (Q, soc, sri) , (tid_comp, tid_per, a_tide, p_tide)
 
 
+def forc_GUA_Q22(Qin):
+    '''
+    forcing for case published in Biemond et al. 2024
+    '''
+    T = len(Qin)
+    dt = np.zeros(T) + 24*3600 # daily discharge in seconds
 
+    # subtidal 
+    Q = Qin.copy()
+    soc = 35 + np.zeros(T) # salinity of ocean boundary for every time step 
+    sri = 0.5 + np.zeros(T) # salinity of river boundary for every time step
 
+    # tidal 
+    tid_comp = ['M2']
+    tid_per = [44700]
+    a_tide = [0]
+    p_tide = [0]
 
-
-
+    return (T, dt) , (Q, soc, sri) , (tid_comp, tid_per, a_tide, p_tide)

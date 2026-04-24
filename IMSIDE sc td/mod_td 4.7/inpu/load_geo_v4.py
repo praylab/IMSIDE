@@ -37,3 +37,13 @@ def geo_LOI2():
     Hn = np.array([2.5,9,9,12,12])
     
     return Hn, Ln, bsn, dxn
+
+
+def geo_GUA_biemond22():
+
+    Ln = np.array([75000,35000,25000])
+    bsn = np.array([150,408,650,650*np.exp(10)])
+    dxn = np.array([500,100,200]) 
+    Hn = np.array([7.1]*3)
+
+    return Hn, Ln, bsn, dxn
