@@ -10,5 +10,8 @@ figs
 # ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# ignore local note file 
+# ignore local note file
 notes_pb.txt
+
+# ignore notebook directory
+IMSIDE sc td/mod_td 4.7/notebook/
