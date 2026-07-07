@@ -2,6 +2,7 @@
 
 # ignore data files
 data
+figs
 
 # ignore virtual environment
 .venv
