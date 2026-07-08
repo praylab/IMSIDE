@@ -9,7 +9,7 @@ import time
 from tqdm import trange
 import copy
 
-def NewtonRaphson_ti(self, init, version, t):
+def NewtonRaphson_ti(self, init, version, t, tidal):
     
     sss=init
     
@@ -22,17 +22,22 @@ def NewtonRaphson_ti(self, init, version, t):
             + self.jaco_bnd_subtidal(sss, self.st_all , self.ii_all , version, t)
             
     #tidal part 
-    for i in range(len(self.tid_comp)):
-        tid_set = self.tid_sets[self.tid_comp[i]]
-        tid_geg = self.tid_gegs[self.tid_comp[i]]
-        tid_inp = self.tidal_salinity(sss, tid_set, tid_geg)
-        
-        #add to solution vector
-        sol_tot += self.solu_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
-        sol_tot += self.solu_bnd_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
-        #add to jacobian
-        jac_tot += self.jaco_tidal(sss, tid_geg, self.ii_all , version)
-        jac_tot += self.jaco_bnd_tidal(sss, tid_geg, self.ii_all , version)
+    if tidal == True: 
+        for i in range(len(self.tid_comp)):
+            tid_set = self.tid_sets[self.tid_comp[i]]
+            tid_geg = self.tid_gegs[self.tid_comp[i]]
+            tid_inp = self.tidal_salinity(sss, tid_set, tid_geg)
+            
+            #add to solution vector
+            sol_tot += self.solu_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
+            sol_tot += self.solu_bnd_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
+            #add to jacobian
+            jac_tot += self.jaco_tidal(sss, tid_geg, self.ii_all , version)
+            jac_tot += self.jaco_bnd_tidal(sss, tid_geg, self.ii_all , version)
+    else: 
+        # add boundary layer corrections 
+        sol_tot += self.boundary_layer_correction(sss, self.ii_all)
+        jac_tot += self.jaco_boundary_layer_correction(self.ii_all)
 
     sss_n = init - sp.sparse.linalg.spsolve(sp.sparse.csc_matrix(jac_tot),sol_tot)  # this is faster then np.linalg.solve (at least for a sufficiently large matrix)
 
@@ -52,17 +57,22 @@ def NewtonRaphson_ti(self, init, version, t):
                 + self.jaco_bnd_subtidal(sss, self.st_all , self.ii_all , version, t)
                 
         #tidal part 
-        for i in range(len(self.tid_comp)):
-            tid_set = self.tid_sets[self.tid_comp[i]]
-            tid_geg = self.tid_gegs[self.tid_comp[i]]
-            tid_inp = self.tidal_salinity(sss, tid_set, tid_geg)
+        if tidal: 
+            for i in range(len(self.tid_comp)):
+                tid_set = self.tid_sets[self.tid_comp[i]]
+                tid_geg = self.tid_gegs[self.tid_comp[i]]
+                tid_inp = self.tidal_salinity(sss, tid_set, tid_geg)
 
-            #add to solution vector
-            sol_tot += self.solu_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
-            sol_tot += self.solu_bnd_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
-            #add to jacobian
-            jac_tot += self.jaco_tidal(sss, tid_geg, self.ii_all , version)
-            jac_tot += self.jaco_bnd_tidal(sss, tid_geg, self.ii_all , version)
+                #add to solution vector
+                sol_tot += self.solu_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
+                sol_tot += self.solu_bnd_tidal(sss, tid_inp, tid_geg, self.ii_all , version)
+                #add to jacobian
+                jac_tot += self.jaco_tidal(sss, tid_geg, self.ii_all , version)
+                jac_tot += self.jaco_bnd_tidal(sss, tid_geg, self.ii_all , version)
+        else: 
+            # add boundary layer corrections 
+            sol_tot += self.boundary_layer_correction(sss, self.ii_all)
+            jac_tot += self.jaco_boundary_layer_correction(self.ii_all)
 
         sss_n = sss - sp.sparse.linalg.spsolve(sp.sparse.csc_matrix(jac_tot),sol_tot)  # this is faster then np.linalg.solve (at least for a sufficiently large matrix)
         
@@ -79,7 +89,7 @@ def NewtonRaphson_ti(self, init, version, t):
 
     
 
-def NewtonRaphson_td(self, init, version):
+def NewtonRaphson_td(self, init, version, tidal):
     sss_o, sss_n = init, init #initialize
     sss_save = [] 
     
@@ -100,21 +110,26 @@ def NewtonRaphson_td(self, init, version):
                 
                 
         #tidal part 
-        for i in range(len(self.tid_comp)):
-            tid_set = self.tid_sets[self.tid_comp[i]]
-            tid_geg = self.tid_gegs[self.tid_comp[i]]
-            tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
-            tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
-            
-            
-            #add to solution vector
-            sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
-            sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-            sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+        if tidal: 
+            for i in range(len(self.tid_comp)):
+                tid_set = self.tid_sets[self.tid_comp[i]]
+                tid_geg = self.tid_gegs[self.tid_comp[i]]
+                tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
+                tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
+                
+                
+                #add to solution vector
+                sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
+                sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+                sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
 
-            #add to jacobian
-            jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
-            jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
+                #add to jacobian
+                jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
+                jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version) 
+        else: 
+            # add boundary layer corrections 
+            sol_tot += self.boundary_layer_correction(sss_n, self.ii_all)
+            jac_tot += self.jaco_boundary_layer_correction(self.ii_all)     
                 
                 
         #do iteration step
@@ -137,22 +152,26 @@ def NewtonRaphson_td(self, init, version):
                     
                     
             #tidal part 
-            for i in range(len(self.tid_comp)):
-                tid_set = self.tid_sets[self.tid_comp[i]]
-                tid_geg = self.tid_gegs[self.tid_comp[i]]
-                #tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
-                tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
-                
-                
-                #add to solution vector
-                sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
-                sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-                sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-    
-                #add to jacobian
-                jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
-                jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
-                
+            if tidal: 
+                for i in range(len(self.tid_comp)):
+                    tid_set = self.tid_sets[self.tid_comp[i]]
+                    tid_geg = self.tid_gegs[self.tid_comp[i]]
+                    #tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
+                    tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
+                    
+                    
+                    #add to solution vector
+                    sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
+                    sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+                    sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+        
+                    #add to jacobian
+                    jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
+                    jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
+            else: 
+                # add boundary layer corrections 
+                sol_tot += self.boundary_layer_correction(sss_n, self.ii_all)
+                jac_tot += self.jaco_boundary_layer_correction(self.ii_all)    
                 
             #do iteration step
             sss_i = sss_n - sp.sparse.linalg.spsolve(sp.sparse.csc_matrix(jac_tot),sol_tot)  #solve the matrix equation and use this for Newton Rapshon
@@ -165,7 +184,7 @@ def NewtonRaphson_td(self, init, version):
             0#print('Timestep', t2+1 , 'of total of', self.T, 'timesteps is finished. ') 
                 
         else: #if no convergence or too low salinity, are we going to use a smaller time step
-            sss_i = solve_ats(sss_o, self, version, t2)
+            sss_i = solve_ats(sss_o, self, version, t2, tidal)
             #print('Timestep', t2+1 , 'of total of', self.T, 'timesteps is finished. ') 
 
         sss_o, sss_n =sss_i, sss_i #update for next timestep
@@ -174,7 +193,7 @@ def NewtonRaphson_td(self, init, version):
     return sss_save 
 
 
-def solve_ats(init, run_ori, version, t):
+def solve_ats(init, run_ori, version, t, tidal):
     # =============================================================================
     # adaptive time step
     # =============================================================================
@@ -212,7 +231,7 @@ def solve_ats(init, run_ori, version, t):
         run_ats.theta = 1
 
         #solve equations
-        out_ats = NewtonRaphson_ats(run_ats, init, version)
+        out_ats = NewtonRaphson_ats(run_ats, init, version, tidal)
         
         
         if reps > 65: 
@@ -223,7 +242,7 @@ def solve_ats(init, run_ori, version, t):
     return out_ats[-1] 
 
 
-def NewtonRaphson_ats(self, init, version):
+def NewtonRaphson_ats(self, init, version, tidal):
     # =============================================================================
     # adaptive time step
     # =============================================================================
@@ -244,22 +263,26 @@ def NewtonRaphson_ats(self, init, version):
                 + self.jaco_timepart(sss_n, self.ii_all, t2)
         
         #tidal part 
-        for i in range(len(self.tid_comp)):
-            tid_set = self.tid_sets[self.tid_comp[i]]
-            tid_geg = self.tid_gegs[self.tid_comp[i]]
-            tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
-            tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
-            
-            
-            #add to solution vector
-            sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
-            sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-            sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-
-            #add to jacobian
-            jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
-            jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
+        if tidal:
+            for i in range(len(self.tid_comp)):
+                tid_set = self.tid_sets[self.tid_comp[i]]
+                tid_geg = self.tid_gegs[self.tid_comp[i]]
+                tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
+                tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
                 
+                
+                #add to solution vector
+                sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
+                sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+                sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+
+                #add to jacobian
+                jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
+                jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
+        else: 
+            # add boundary layer corrections 
+            sol_tot += self.boundary_layer_correction(sss_n, self.ii_all)
+            jac_tot += self.jaco_boundary_layer_correction(self.ii_all)    
                 
         #do iteration step
         #print(init.shape , sss_n.shape, sol_tot.shape, jac_tot.shape)
@@ -281,24 +304,27 @@ def NewtonRaphson_ats(self, init, version):
                     + self.jaco_timepart(sss_n, self.ii_all, t2)
                     
                     
-                    
+            if tidal:        
             #tidal part 
-            for i in range(len(self.tid_comp)):
-                tid_set = self.tid_sets[self.tid_comp[i]]
-                tid_geg = self.tid_gegs[self.tid_comp[i]]
-                #tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
-                tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
-                
-                
-                #add to solution vector
-                sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
-                sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-                sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
-    
-                #add to jacobian
-                jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
-                jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
-
+                for i in range(len(self.tid_comp)):
+                    tid_set = self.tid_sets[self.tid_comp[i]]
+                    tid_geg = self.tid_gegs[self.tid_comp[i]]
+                    #tid_inp_o = self.tidal_salinity(sss_o, tid_set, tid_geg)
+                    tid_inp_n = self.tidal_salinity(sss_n, tid_set, tid_geg)
+                    
+                    
+                    #add to solution vector
+                    sol_tot += (1-self.theta) * self.solu_tidal(sss_o, tid_inp_o, tid_geg, self.ii_all , version)
+                    sol_tot += self.theta * self.solu_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+                    sol_tot += self.solu_bnd_tidal(sss_n, tid_inp_n, tid_geg, self.ii_all , version)
+        
+                    #add to jacobian
+                    jac_tot += self.theta * self.jaco_tidal(sss_n, tid_geg, self.ii_all , version)
+                    jac_tot += self.jaco_bnd_tidal(sss_n, tid_geg, self.ii_all , version)      
+            else: 
+                # add boundary layer corrections 
+                sol_tot += self.boundary_layer_correction(sss_n, self.ii_all)
+                jac_tot += self.jaco_boundary_layer_correction(self.ii_all)    
         
             #do iteration step
             sss_i =sss_n - sp.sparse.linalg.spsolve(sp.sparse.csc_matrix(jac_tot),sol_tot)  #solve the matrix equation and use this for Newton Rapshon
@@ -321,7 +347,7 @@ def NewtonRaphson_ats(self, init, version):
 
 
 
-def solve_eqs(self, version):
+def solve_eqs(self, version, tidal=True):
     tijd = time.time()
     
     # =============================================================================
@@ -346,7 +372,7 @@ def solve_eqs(self, version):
     
     #out_notide = NewtonRaphson_ti(self, init, 'A', 0)
     #out_tide   = NewtonRaphson_ti(self, out_notide, version, 0)
-    out_tide   = NewtonRaphson_ti(self, init, version, 0)
+    out_tide   = NewtonRaphson_ti(self, init, version, 0, tidal)
     
     #if we did not find a solution to the equation, try something else
     if out_tide[0] == None:
@@ -369,8 +395,8 @@ def solve_eqs(self, version):
             self.st_all = self.subtidal_module()
     
             #do the simulation
-            if sim ==0 : out = NewtonRaphson_ti(self, init, version, 0)
-            else: out = NewtonRaphson_ti(self, out, version, 0)
+            if sim ==0 : out = NewtonRaphson_ti(self, init, version, 0, tidal)
+            else: out = NewtonRaphson_ti(self, out, version, 0, tidal)
                 
             if out[0] == None: #if this also not works, stop the calculation
                 raise Exception("ABORT CALCULATION: Also with increased Kh no answer has been found. Check your input and think about \
@@ -384,7 +410,7 @@ def solve_eqs(self, version):
     # =============================================================================
     # finally solve the time-dependent equations
     # =============================================================================
-    out_time   = NewtonRaphson_td(self, out_tide, version)
+    out_time   = NewtonRaphson_td(self, out_tide, version, tidal)
     
     print('Doing the simulation takes ', time.time()-tijd, ' seconds')
         

@@ -191,7 +191,37 @@ def jaco_bnd_subtidal(self, ans, pars_st, indi, version, t):
         
 
     
+    return jac
+
+def boundary_layer_correction(self, ans, indi):
+
+    so = np.zeros(self.di3[-1]*self.M)
+
+    #no equations for the river and sea boundaries correction
+    so[indi['bnl_bnd']] = ans[indi['bnl_bnd']]
+
+    #(simple) equations for the boundary layer corrections
+    so[indi['bnl_lft']] = ans[indi['bnl_lft']]
+    so[indi['bnl_rgt']] = ans[indi['bnl_rgt']]
+
+    return so 
+
+
+
+def jaco_boundary_layer_correction(self, indi):
+
+    jac = np.zeros((self.di3[-1]*self.M,self.di3[-1]*self.M))
+    # =============================================================================
+    # boundary layer correctoion
+    # =============================================================================
     
+    #no equations for points at boundaries
+    jac[indi['bnl_bnd'],indi['bnl_bnd']] += 1
+
+    #(simple) equations for the boundary layer corrections
+    jac[indi['bnl_lft'],indi['bnl_lft']] += 1
+    jac[indi['bnl_rgt'],indi['bnl_rgt']] += 1
+
     return jac
 
 

@@ -109,3 +109,6 @@ class mod1c_g4:
     from physics.inertiaterm_v1 import solu_timepart, jaco_timepart
     
     from visualisation.plot_functions_v1 import plot_sst , prt_numbers , plot_transport , plot_X2
+
+    # add boundary layer corrections
+    from physics.bnd_subtidal_v4 import boundary_layer_correction, jaco_boundary_layer_correction
