@@ -12,6 +12,7 @@ def subtidal_module(self):
     # =============================================================================
 
     #different parametrizations possible
+    #TODO: impose spatially varying velocity 
     
     #vertical viscosity
     if self.choice_viscosityv_st == 'constant': 0 #do nothing, value is specified
