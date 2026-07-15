@@ -269,7 +269,7 @@ def forc_GUA_pb(dat_start , dat_stop):
     # build forcing for Guadalquivir 2009
     # =============================================================================
             
-    disc = sp.io.loadmat('data/freshwater_discharges.mat')
+    disc = sp.io.loadmat(r'C:\Users\pba003\Documents\IMSIDE\data\freshwater_discharges.mat')
 
     Q_gu = np.array(disc['Q']).flatten()
     Qt = np.array(disc['t']).flatten()
