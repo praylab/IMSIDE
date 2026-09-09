@@ -32,21 +32,22 @@ t = np.linspace(0, 2*np.pi/tidal['omega'], 200)
 u_signal = [np.real(u * np.exp(1j * tidal['omega'] * t)) for u in tidal['utb']]
 ut_x = np.max(u_signal, axis=1)
 
-# # plot the tidal velocity 
-# plt.plot(model.px, ut_x)
-# plt.xlabel("t")
-# plt.ylabel("maximum tidal velocity (m/s)")
-# plt.show()
-
 # check if the current due to river is exceeding the tidal current 
 Q_max = 100
 u_river = Q_max / (model.H * model.b)
 
 # plot it together 
-plt.plot(model.px, ut_x, label='tidal velocity')
-plt.plot(model.px, u_river, label='river velocity')
-plt.xlabel("x")
-plt.ylabel("velocity (m/s)")
-plt.legend()
-plt.show()
+fig, ax = plt.subplots(2, 1, figsize=(7, 6), gridspec_kw={'height_ratios': [3, 2]})
 
+ax[0].plot(model.px, ut_x, label='tidal velocity')
+ax[0].plot(model.px, u_river, label='river velocity')
+ax[0].set_ylabel('Velocity (m/s)')
+ax[0].legend()
+
+ax[1].plot(model.px, 2*model.b, color='grey')
+# ax[1].plot(model.px, -model.b, color='grey')
+ax[1].set_ylim([0, 2500])
+ax[1].set_ylabel('estuary width (m)')
+ax[1].set_xlabel('x (m)')
+
+fig.show()
