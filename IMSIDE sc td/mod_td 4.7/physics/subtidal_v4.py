@@ -16,7 +16,11 @@ def subtidal_module(self):
     
     #vertical viscosity
     if self.choice_viscosityv_st == 'constant': 0 #do nothing, value is specified
-    elif self.choice_viscosityv_st == 'cuh': self.Av_st = self.cv_st * self.Ut * self.H
+    elif self.choice_viscosityv_st == 'cuh': 
+        if self.Ut_x is None:             
+            self.Av_st = self.cv_st * self.Ut * self.H
+        else: 
+            self.Av_st = self.cv_st * self.Ut_x * self.H
     else: print('ERROR: no valid op option for choice vertical viscosity subtidal')
 
     #vertical diffusivity
@@ -28,8 +32,11 @@ def subtidal_module(self):
     if self.choice_diffusivityh_st == 'constant':             
         Kh = self.Kh_st + np.zeros(self.di[-1])
         Kh[self.di[-2]:]= self.Kh_st * self.b[self.di[-2]:]/self.b[self.di[-2]] #sea domain
-    if self.choice_diffusivityh_st == 'cub':             
-        Kh = self.ch_st * self.Ut * self.b
+    if self.choice_diffusivityh_st == 'cub':
+        if self.Ut_x is None:             
+            Kh = self.ch_st * self.Ut * self.b
+        else: 
+            Kh = self.ch_st * self.Ut_x * self.b
 
     #derivative, is different in sea domain than in rest
     Kh_x = np.zeros(Kh.shape) + np.nan
@@ -162,10 +169,16 @@ def subtidal_module(self):
     # =============================================================================
 
     Hbnd = np.array([(self.Hn[i]+self.Hn[i+1])/2 for i in range(self.ndom-1)])
+
+    # get Ut at boundary, take the boundary value as the average of the grid points on either side
+    if self.Ut_x is None: 
+        Utbnd = self.Ut
+    else: 
+        Utbnd = (self.Ut_x[self.di[1:-1]-1] + self.Ut_x[self.di[1:-1]]) / 2
     
     #vertical viscosity
     if self.choice_viscosityv_st == 'constant': Av_stb = self.Av_st + np.zeros(self.ndom-1) #do nothing, value is specified
-    elif self.choice_viscosityv_st == 'cuh': Av_stb = self.cv_st * self.Ut * Hbnd
+    elif self.choice_viscosityv_st == 'cuh': Av_stb = self.cv_st * Utbnd * Hbnd
     else: print('ERROR: no valid op option for choice vertical viscosity subtidal')
     
     #coefficients

@@ -27,6 +27,9 @@ class mod1c_g4:
 
         #save input for adaptive time step. 
         self.input_raw =  (copy.deepcopy(inp_constants) , copy.deepcopy(inp_phys), copy.deepcopy(inp_geo), copy.deepcopy(inp_forc))
+
+        # add ut_x 
+        self.Ut_x = None
         # =============================================================================
         # checks
         # =============================================================================
