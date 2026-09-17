@@ -60,8 +60,73 @@ def calc_utx(model):
     tidal = model.tidal_module(tid_set)
 
     # calculate 1 tidal cycle 
-    t = np.linspace(0, 2*np.pi/tidal['omega'], 200)
-    u_signal = [np.real(u * np.exp(1j * tidal['omega'] * t)) for u in tidal['utb']]
+    ut_x = extract_ut(tidal)
+
+    return ut_x
+
+
+def calc_avti(ut, model):
+    av_x =  model.cv_ti[0] * ut * model.H
+    av_x[model.di[-2]+1:model.di[-1]] = av_x[model.di[-2]]
+
+    avti_min = 0.001 # arbitrary number 
+    av_x = np.clip(av_x, a_min=avti_min, a_max=None)
+
+    return av_x
+
+
+def iter_ux(model, alpha):
+    # initialise 
+    tol = np.inf
+    
+    uts = []
+    avs = []
+
+    uts.append(np.zeros(model.di[-1]) + model.Ut)
+    avs.append(calc_avti(model.Ut, model))
+
+    # tidal set 
+    tid_set = {
+        'tid_comp': model.tid_comp[0], 
+        'tid_per': model.tid_per[0], 
+        'a_tide': model.a_tide[0], 
+        'p_tide': model.p_tide[0], 
+        'Av_ti': model.Av_ti[0], 
+        'Kv_ti': model.Kv_ti[0], 
+        'sf_ti': model.sf_ti[0], 
+        'rr_ti': model.rr_ti[0], 
+        'Kh_ti': model.Kh_ti[0], 
+        'cv_ti': model.cv_ti[0], 
+        'Sc_ti': model.Sc_ti[0], 
+    }
+
+    while tol > 10e-5:
+
+        tidal_flow = model.tidal_flow(tid_set)
+        ut_x = extract_ut(tidal_flow)
+        av_ti = tidal_flow['av_ti']
+
+        # to avoid the solution to be too far 
+        ut_next = alpha * ut_x + (1-alpha) * model.Ut
+
+        # calculate new viscosity param
+        av_next = calc_avti(ut_next, model)
+
+        # calculate tolerance
+        uts.append(ut_next)
+        avs.append(av_next)
+
+        tol = np.max(abs(av_ti - av_next))
+
+        # update ut 
+        model.Ut = ut_next
+
+    return tidal_flow, uts, avs
+
+
+def extract_ut(tidal_flow): 
+    t = np.linspace(0, 2*np.pi/tidal_flow['omega'], 200)
+    u_signal = [np.real(u * np.exp(1j * tidal_flow['omega'] * t)) for u in tidal_flow['utb']]
     ut_x = np.max(u_signal, axis=1)
 
     return ut_x
@@ -75,9 +140,10 @@ def run_model(constants, phys_pars, geo_pars, forc_pars, xlocs_obs, zlocs_obs, t
     # set up model environment
     run = mod1c_g4(constants, phys_pars, geo_pars, forc_pars)
 
-    # calculate ux 
+    # calculate varying Ut_x 
     if ux == 'vary': 
-        run.Ut_x = calc_utx(run)
+        tidal_flow, _, _ = iter_ux(run, 0.5)
+        run.Ut_x = extract_ut(tidal_flow) # change into iterative 
     elif ux == 'constant': 
         run.Ut_x = None
 
