@@ -107,7 +107,7 @@ class mod1c_g4:
         
     from physics.solve_td_v4 import NewtonRaphson_ti , NewtonRaphson_td , solve_eqs
      
-    from physics.tidal_v4 import tidal_module , tidal_salinity , solu_tidal, jaco_tidal #, tidsol_inda , tidjac_inda , tidsol_indv , tidjac_indv , tidsol_bnd , tidjac_bnd ,
+    from physics.tidal_v4 import tidal_module , tidal_flow, tidal_salinity , solu_tidal, jaco_tidal #, tidsol_inda , tidjac_inda , tidsol_indv , tidjac_indv , tidsol_bnd , tidjac_bnd ,
     
     from physics.inertiaterm_v1 import solu_timepart, jaco_timepart
     
